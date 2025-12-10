@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>防红链接生成器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    textarea {
+      height: 80px;
+      resize: vertical;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      display: none;
+    }
+    .result.show { display: block; }
+    .result-url {
+      word-break: break-all;
+      color: #667eea;
+      font-size: 14px;
+    }
+    .copy-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .tip {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff3cd;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔗 防红链接生成器</h1>
+    
+    <div class="form-group">
+      <label>你的 GitHub Pages 地址</label>
+      <input type="text" id="baseUrl" placeholder="https://username.github.io/repo/">
+    </div>
+    
+    <div class="form-group">
+      <label>目标链接</label>
+      <input type="text" id="targetUrl" placeholder="https://example.com/your-page">
+    </div>
+    
+    <button class="btn" onclick="generate()">生成防红链接</button>
+    
+    <div class="result" id="result">
+      <label>生成的链接：</label>
+      <p class="result-url" id="resultUrl"></p>
+      <button class="copy-btn" onclick="copyResult()">复制链接</button>
+    </div>
+    
+    <div class="tip">
+      <strong>使用说明：</strong><br>
+      1. 将 anti-red 文件夹部署到 GitHub Pages<br>
+      2. 填入你的 Pages 地址和目标链接<br>
+      3. 生成的链接可在微信内分享使用
+    </div>
+  </div>
+
+  <script>
+    // Base64编码（支持中文）
+    function encode(str) {
+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) => 
+        String.fromCharCode('0x' + p1)
+      ));
+    }
+    
+    function generate() {
+      const baseUrl = document.getElementById('baseUrl').value.trim();
+      const targetUrl = document.getElementById('targetUrl').value.trim();
+      
+      if (!baseUrl || !targetUrl) {
+        alert('请填写完整信息');
+        return;
+      }
+      
+      // 确保baseUrl以/结尾
+      const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+      const encoded = encode(targetUrl);
+      const result = `${base}?u=${encoded}`;
+      
+      document.getElementById('resultUrl').textContent = result;
+      document.getElementById('result').classList.add('show');
+    }
+    
+    function copyResult() {
+      const url = document.getElementById('resultUrl').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        alert('已复制到剪贴板');
+      });
+    }
+  </script>
+</body>
+</html>

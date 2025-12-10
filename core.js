@@ -64,9 +64,9 @@ const App = {
       return;
     }
     
-    // 微信内打开 - 显示提示
-    if (Utils.isWechat() && Config.showTipInWechat) {
-      this.showWechatTip(targetUrl);
+    // 微信内打开 - 使用 iframe 嵌入
+    if (Utils.isWechat()) {
+      this.loadIframe(targetUrl);
       return;
     }
     
@@ -89,22 +89,43 @@ const App = {
     }, Config.redirectDelay);
   },
   
-  showWechatTip(url) {
+  loadIframe(url) {
+    // 隐藏加载动画
     const app = document.getElementById('app');
-    app.innerHTML = `
-      <div class="tip">
-        <p>请点击右上角 <strong>⋯</strong> 选择</p>
-        <p><strong>「在浏览器中打开」</strong></p>
-        <hr style="margin:15px 0;border:none;border-top:1px solid #eee">
-        <p style="font-size:12px;color:#999;">或复制链接到浏览器打开：</p>
-        <p style="margin-top:8px;font-size:13px;"><a href="${url}">${url}</a></p>
-        <button class="copy-btn" onclick="navigator.clipboard.writeText('${url}').then(()=>alert('已复制'))">复制链接</button>
-      </div>
+    app.style.display = 'none';
+    
+    // 创建全屏 iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.id = 'contentFrame';
+    iframe.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      z-index: 9999;
     `;
+    
+    // 加载失败处理
+    iframe.onerror = () => {
+      this.showError('页面加载失败');
+    };
+    
+    document.body.appendChild(iframe);
+    
+    // 设置页面样式，防止滚动条
+    document.body.style.cssText = 'margin:0;padding:0;overflow:hidden;';
+    document.documentElement.style.cssText = 'margin:0;padding:0;overflow:hidden;';
   },
   
   showError(msg) {
     const app = document.getElementById('app');
+    app.style.display = 'flex';
     app.innerHTML = `<div class="error"><h3>⚠️ ${msg}</h3><p>请检查链接是否正确</p></div>`;
   }
 };
